@@ -1,15 +1,19 @@
-[submodule "Modules/json"]
-	path = Modules/json
-	url = https://github.com/nlohmann/json
-[submodule "Modules/ff_meters"]
-	path = Modules/ff_meters
-	url = https://github.com/ffAudio/ff_meters
-[submodule "Modules/NeuralAmpModelerCore"]
-	path = Modules/NeuralAmpModelerCore
-	url = https://github.com/sdatkinson/NeuralAmpModelerCore
-[submodule "Modules/AudioDSPTools"]
-	path = Modules/AudioDSPTools
-	url = https://github.com/Tr3m/AudioDSPTools
-[submodule "Modules/JUCE"]
-	path = Modules/JUCE
+[submodule "deps/JUCE"]
+	path = deps/JUCE
 	url = https://github.com/juce-framework/JUCE
+
+[submodule "deps/NeuralAmpModelerCore"]
+		path = deps/NeuralAmpModelerCore
+		url = https://github.com/sdatkinson/NeuralAmpModelerCore
+
+[submodule "deps/AudioDSPTools"]
+		path = deps/AudioDSPTools
+		url = https://github.com/sdatkinson/AudioDSPTools
+
+[submodule "deps/json"]
+	path = deps/json
+	url = https://github.com/nlohmann/json
+
+[submodule "deps/ff_meters"]
+	path = deps/ff_meters
+	url = https://github.com/ffAudio/ff_meters

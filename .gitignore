@@ -1,9 +1,2 @@
-Builds/
 build/
-.vscode/c_cpp_properties.json
-.vscode/settings.json
-JuceLibraryCode/
-Installers/
-sdk/
-Scripts/venv
-venv
+.cache/
