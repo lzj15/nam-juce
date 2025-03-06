@@ -3,7 +3,6 @@
 #include "PluginProcessor.h"
 #include "MyLookAndFeel.h"
 #include "AssetManager.h"
-#include "EqEditor.h"
 #include "TopBarComponent.h"
 #include "LedButtonComponent.h"
 
@@ -47,7 +46,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderAttachments[NUM_SLIDERS];
 
     juce::String sliderIDs[NUM_SLIDERS]{
-        "INPUT_ID", "NGATE_ID", "BASS_ID", "MIDDLE_ID", "TREBLE_ID", "OUTPUT_ID", "LOWCUT_ID", "HIGHCUT_ID", "DOUBLER_ID"};
+        "INPUT_ID", "NGATE_ID", "BASS_ID", "MIDDLE_ID", "TREBLE_ID", "OUTPUT_ID"};
 
     std::unique_ptr<AssetManager> assetManager;
 
@@ -64,7 +63,6 @@ private:
 
     std::unique_ptr<juce::ImageButton> loadModelButton, loadIRButton, clearIrButton, clearModelButton;
     std::unique_ptr<LedButtonComponent> toneStackButton, normalizeButton, irButton, eqButton;
-    juce::Image xIcon = juce::ImageFileFormat::loadFrom(BinaryData::xIcon_png, BinaryData::xIcon_pngSize);
 
     //// TODO: Move this into a dedicated component with its own timer
     juce::Image led_off = juce::ImageFileFormat::loadFrom(BinaryData::led_off_png, BinaryData::led_off_pngSize);
@@ -75,8 +73,6 @@ private:
 
     foleys::LevelMeter meterIn{foleys::LevelMeter::SingleChannel}, meterOut{foleys::LevelMeter::SingleChannel};
     MeterLookAndFeel meterlnf, meterlnf2;
-
-    EqEditor eqEditor;
 
     TopBarComponent topBar;
 

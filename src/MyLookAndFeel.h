@@ -400,10 +400,7 @@ public:
                 // g.setColour(slider.findColour(Slider::thumbColourId));
                 // g.fillRect(Rectangle<float>(static_cast<float> (thumbWidth*3), static_cast<float> (thumbWidth)).withCentre(isThreeVal ? thumbPoint
                 // : maxPoint));
-                g.drawImage(thumbOn,
-                            juce::Rectangle<float>(static_cast<float>(thumbWidth * 4), static_cast<float>(thumbWidth * 4))
-                                .withCentre(isThreeVal ? thumbPoint : maxPoint),
-                            false);
+
             }
 
             if (isTwoVal || isThreeVal)
@@ -430,7 +427,7 @@ public:
 
 
 private:
-    Image thumbOn = ImageFileFormat::loadFrom(BinaryData::eq_thumb_on_png, BinaryData::eq_thumb_on_pngSize);
+
 };
 
 //===================================================================
@@ -501,10 +498,7 @@ public:
                 // g.setColour(slider.findColour(Slider::thumbColourId));
                 // g.fillRect(Rectangle<float>(static_cast<float> (thumbWidth*3), static_cast<float> (thumbWidth)).withCentre(isThreeVal ? thumbPoint
                 // : maxPoint));
-                g.drawImage(thumbOff,
-                            juce::Rectangle<float>(static_cast<float>(thumbWidth * 4), static_cast<float>(thumbWidth * 4))
-                                .withCentre(isThreeVal ? thumbPoint : maxPoint),
-                            false);
+
             }
 
             if (isTwoVal || isThreeVal)
@@ -531,7 +525,7 @@ public:
 
 
 private:
-    Image thumbOff = ImageFileFormat::loadFrom(BinaryData::eq_thumb_off_png, BinaryData::eq_thumb_off_pngSize);
+
 };
 
 //===================================================================

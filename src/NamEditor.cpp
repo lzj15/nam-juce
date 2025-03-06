@@ -1,7 +1,7 @@
 #include "NamEditor.h"
 
 NamEditor::NamEditor(NamJUCEAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p), eqEditor(p), topBar(p, [&]() { updateAfterPresetLoad(); })
+    : AudioProcessorEditor(&p), audioProcessor(p), topBar(p, [&]() { updateAfterPresetLoad(); })
 {
     assetManager.reset(new AssetManager());
 
@@ -48,12 +48,6 @@ NamEditor::NamEditor(NamJUCEAudioProcessor& p)
             sliders[slider]->setBounds(xStart + (slider * xOffsetMultiplier), 204, knobSize, knobSize);
     }
 
-    sliders[PluginKnobs::LowCut]->setCustomSlider(CustomSlider::SliderTypes::Filters);
-    sliders[PluginKnobs::HighCut]->setCustomSlider(CustomSlider::SliderTypes::Filters);
-    sliders[PluginKnobs::Doubler]->setPopupDisplayEnabled(true, true, getTopLevelComponent());
-    sliders[PluginKnobs::Doubler]->setCustomSlider(CustomSlider::SliderTypes::Doubler);
-    sliders[PluginKnobs::Doubler]->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
-    sliders[PluginKnobs::Doubler]->setBounds(sliders[PluginKnobs::Output]->getX(), 435, knobSize, knobSize);
     sliders[PluginKnobs::NoiseGate]->setPopupDisplayEnabled(true, true, getTopLevelComponent());
     sliders[PluginKnobs::NoiseGate]->setCustomSlider(CustomSlider::SliderTypes::Gate);
     sliders[PluginKnobs::NoiseGate]->setPopupDisplayEnabled(true, true, getTopLevelComponent());
@@ -125,12 +119,6 @@ NamEditor::NamEditor(NamJUCEAudioProcessor& p)
         sliderAttachments[slider] =
             std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, sliderIDs[slider], *sliders[slider]);
 
-    sliderAttachments[PluginKnobs::LowCut] =
-        std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "LOWCUT_ID", *sliders[PluginKnobs::LowCut]);
-    sliderAttachments[PluginKnobs::HighCut] =
-        std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "HIGHCUT_ID", *sliders[PluginKnobs::HighCut]);
-    sliderAttachments[PluginKnobs::Doubler] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-        audioProcessor.apvts, "DOUBLER_SPREAD_ID", *sliders[PluginKnobs::Doubler]);
 
     toneStackToggleAttachment.reset(
         new juce::AudioProcessorValueTreeState::ButtonAttachment(audioProcessor.apvts, "TONE_STACK_ON_ID", *toneStackToggle));
@@ -187,52 +175,7 @@ NamEditor::NamEditor(NamJUCEAudioProcessor& p)
         irButton->setLedState(*audioProcessor.apvts.getRawParameterValue("CAB_ON_ID"));
     };
 
-    assetManager->initializeButton(eqButton, AssetManager::Buttons::EQ_BUTTON);
-    addAndMakeVisible(eqButton.get());
-    eqButton->setBounds(sliders[PluginKnobs::NoiseGate]->getX() + (sliders[PluginKnobs::NoiseGate]->getWidth() / 2) - 45,
-                        sliders[PluginKnobs::NoiseGate]->getY() + sliders[PluginKnobs::NoiseGate]->getHeight() + 15, 90, 40);
-    eqButton->setLedState(*audioProcessor.apvts.getRawParameterValue("EQ_BYPASS_STATE_ID"));
-    eqButton->setAlwaysOnTop(true);
-    eqButton->toFront(false);
 
-    addAndMakeVisible(&eqEditor);
-    eqEditor.setVisible(false);
-
-
-    eqButton->onClick = [this]
-    {
-        auto modifiers = juce::ModifierKeys::getCurrentModifiers();
-        if (modifiers.isShiftDown() && !audioProcessor.eqModuleVisible)
-        {
-            eqEditor.toggleEq();
-            eqButton->setLedState(*audioProcessor.apvts.getRawParameterValue("EQ_BYPASS_STATE_ID"));
-        }
-        else
-        {
-            audioProcessor.eqModuleVisible = !audioProcessor.eqModuleVisible;
-            eqEditor.setVisible(audioProcessor.eqModuleVisible);
-
-            if (audioProcessor.eqModuleVisible)
-            {
-                eqButton->setLabelVisible(false);
-                eqButton->setBounds(getWidth() - 43, 25, 20, 20);
-                eqButton->setImages(false, true, false, xIcon, 0.7f, juce::Colours::transparentWhite, xIcon, 1.0f, juce::Colours::transparentWhite,
-                                    xIcon, 0.65f, juce::Colours::transparentWhite, 0);
-            }
-            else
-            {
-                eqButton->setLabelVisible(true);
-                eqButton->reloadImages();
-                eqButton->setBounds(sliders[PluginKnobs::NoiseGate]->getX() + (sliders[PluginKnobs::NoiseGate]->getWidth() / 2) - 45,
-                                    sliders[PluginKnobs::NoiseGate]->getY() + sliders[PluginKnobs::NoiseGate]->getHeight() + 15, 90, 40);
-                eqButton->setLedState(*audioProcessor.apvts.getRawParameterValue("EQ_BYPASS_STATE_ID"));
-            }
-
-            setMeterPosition(!audioProcessor.eqModuleVisible);
-        }
-    };
-
-    eqButton->toFront(true);
     meterIn.toFront(true);
     meterOut.toFront(true);
 
@@ -267,7 +210,6 @@ void NamEditor::paint(juce::Graphics& g)
 
 void NamEditor::resized()
 {
-    eqEditor.setBounds(getLocalBounds());
 
     setMeterPosition(!audioProcessor.eqModuleVisible); // Need to change this when more modules are added...
 
@@ -395,22 +337,6 @@ void NamEditor::setMeterPosition(bool isOnMainScreen)
 
 void NamEditor::updateAfterPresetLoad()
 {
-
-    if (audioProcessor.eqModuleVisible)
-    {
-        eqButton->setLabelVisible(false);
-        eqButton->setImages(false, true, false, xIcon, 0.7f, juce::Colours::transparentWhite, xIcon, 1.0f, juce::Colours::transparentWhite, xIcon,
-                            0.65f, juce::Colours::transparentWhite, 0);
-    }
-    else
-    {
-        eqButton->setLedState(*audioProcessor.apvts.getRawParameterValue("EQ_BYPASS_STATE_ID"));
-        eqButton->setLabelVisible(true);
-        eqButton->reloadImages();
-    }
-
-
-    eqEditor.updateGraphics();
 
     setToneStackEnabled(bool(*audioProcessor.apvts.getRawParameterValue("TONE_STACK_ON_ID")));
 
