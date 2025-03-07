@@ -34,10 +34,7 @@ public:
         Bass,
         Middle,
         Treble,
-        Output,
-        LowCut,
-        HighCut,
-        Doubler
+        Output
     };
 
 

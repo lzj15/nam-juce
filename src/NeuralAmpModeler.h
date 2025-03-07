@@ -1,13 +1,10 @@
 #ifndef __NEURAL_AMP_MODELER_H__
 #define __NEURAL_AMP_MODELER_H__
 
-// #define NAM_SAMPLE_FLOAT
-// #define DSP_SAMPLE_FLOAT
 
 #include "ResamplingNAM.h"
 #include "ToneStack.h"
 #include "StatusedTrigger.h"
-#include "architecture.hpp"
 
 #include <juce_dsp/juce_dsp.h>
 #include <juce_audio_processors/juce_audio_processors.h>

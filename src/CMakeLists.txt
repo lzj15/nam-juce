@@ -7,8 +7,6 @@ PRIVATE
     PluginEditor.cpp
     PluginProcessor.cpp
     TopBarComponent.cpp
-    architecture.hpp
+    PresetManager/PresetManager.cpp
+    PresetManager/PresetManagerComponent.cpp
 )
-
-add_subdirectory(CustomStandaloneWindow)
-add_subdirectory(PresetManager)
