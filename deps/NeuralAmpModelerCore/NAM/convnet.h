@@ -22,7 +22,7 @@ namespace convnet
 class BatchNorm
 {
 public:
-  BatchNorm(){};
+  BatchNorm() {};
   BatchNorm(const int dim, std::vector<float>::iterator& weights);
   void process_(Eigen::MatrixXf& input, const long i_start, const long i_end) const;
 
@@ -39,7 +39,7 @@ private:
 class ConvNetBlock
 {
 public:
-  ConvNetBlock(){};
+  ConvNetBlock() {};
   void set_weights_(const int in_channels, const int out_channels, const int _dilation, const bool batchnorm,
                     const std::string activation, std::vector<float>::iterator& weights);
   void process_(const Eigen::MatrixXf& input, Eigen::MatrixXf& output, const long i_start, const long i_end) const;
@@ -55,7 +55,7 @@ private:
 class _Head
 {
 public:
-  _Head(){};
+  _Head() {};
   _Head(const int channels, std::vector<float>::iterator& weights);
   void process_(const Eigen::MatrixXf& input, Eigen::VectorXf& output, const long i_start, const long i_end) const;
 
@@ -71,6 +71,8 @@ public:
           std::vector<float>& weights, const double expected_sample_rate = -1.0);
   ~ConvNet() = default;
 
+  void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames) override;
+
 protected:
   std::vector<ConvNetBlock> _blocks;
   std::vector<Eigen::MatrixXf> _block_vals;
@@ -81,7 +83,8 @@ protected:
   void _update_buffers_(NAM_SAMPLE* input, const int num_frames) override;
   void _rewind_buffers_() override;
 
-  void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames) override;
+  int mPrewarmSamples = 0; // Pre-compute during initialization
+  int PrewarmSamples() override { return mPrewarmSamples; };
 };
 }; // namespace convnet
 }; // namespace nam

@@ -8,7 +8,7 @@
 
 [submodule "deps/AudioDSPTools"]
 		path = deps/AudioDSPTools
-		url = https://github.com/sdatkinson/AudioDSPTools
+		url = https://github.com/Tr3m/AudioDSPTools
 
 [submodule "deps/json"]
 	path = deps/json

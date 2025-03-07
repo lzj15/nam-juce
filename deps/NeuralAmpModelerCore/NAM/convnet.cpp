@@ -109,9 +109,9 @@ nam::convnet::ConvNet::ConvNet(const int channels, const std::vector<int>& dilat
   if (it != weights.end())
     throw std::runtime_error("Didn't touch all the weights when initializing ConvNet");
 
-  _prewarm_samples = 1;
+  mPrewarmSamples = 1;
   for (size_t i = 0; i < dilations.size(); i++)
-    _prewarm_samples += dilations[i];
+    mPrewarmSamples += dilations[i];
 }
 
 
@@ -132,6 +132,9 @@ void nam::convnet::ConvNet::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const
   // Copy to required output array (TODO tighten this up)
   for (int s = 0; s < num_frames; s++)
     output[s] = this->_head_output(s);
+
+  // Prepare for next call:
+  nam::Buffer::_advance_input_buffer_(num_frames);
 }
 
 void nam::convnet::ConvNet::_verify_weights(const int channels, const std::vector<int>& dilations, const bool batchnorm,
@@ -144,7 +147,7 @@ void nam::convnet::ConvNet::_update_buffers_(NAM_SAMPLE* input, const int num_fr
 {
   this->Buffer::_update_buffers_(input, num_frames);
 
-  const size_t buffer_size = this->_input_buffer.size();
+  const long buffer_size = (long)this->_input_buffer.size();
 
   if (this->_block_vals[0].rows() != 1 || this->_block_vals[0].cols() != buffer_size)
   {

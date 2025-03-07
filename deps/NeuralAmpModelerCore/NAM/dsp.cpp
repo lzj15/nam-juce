@@ -21,25 +21,33 @@ nam::DSP::DSP(const double expected_sample_rate)
 
 void nam::DSP::prewarm()
 {
-  if (_prewarm_samples == 0)
+  const int prewarmSamples = PrewarmSamples();
+  if (prewarmSamples == 0)
     return;
 
-  NAM_SAMPLE sample = 0;
-  NAM_SAMPLE* sample_ptr = &sample;
-
-  // pre-warm the model for a model-specific number of samples
-  for (long i = 0; i < _prewarm_samples; i++)
+  const size_t bufferSize = std::max(mMaxBufferSize, 1);
+  std::vector<NAM_SAMPLE> inputBuffer, outputBuffer;
+  inputBuffer.resize(bufferSize);
+  outputBuffer.resize(bufferSize);
+  for (auto it = inputBuffer.begin(); it != inputBuffer.end(); ++it)
   {
-    this->process(sample_ptr, sample_ptr, 1);
-    this->finalize_(1);
-    sample = 0;
+    (*it) = (NAM_SAMPLE)0.0;
+  }
+
+  NAM_SAMPLE* inputPtr = inputBuffer.data();
+  NAM_SAMPLE* outputPtr = outputBuffer.data();
+  int samplesProcessed = 0;
+  while (samplesProcessed < prewarmSamples)
+  {
+    this->process(inputPtr, outputPtr, bufferSize);
+    samplesProcessed += bufferSize;
   }
 }
 
 void nam::DSP::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames)
 {
   // Default implementation is the null operation
-  for (size_t i = 0; i < num_frames; i++)
+  for (int i = 0; i < num_frames; i++)
     output[i] = input[i];
 }
 
@@ -52,13 +60,22 @@ double nam::DSP::GetLoudness() const
   return mLoudness;
 }
 
+void nam::DSP::Reset(const double sampleRate, const int maxBufferSize)
+{
+  // Some subclasses might want to throw an exception if the sample rate is "wrong".
+  // This could be under a debugging flag potentially.
+  mExternalSampleRate = sampleRate;
+  mHaveExternalSampleRate = true;
+  mMaxBufferSize = maxBufferSize;
+
+  // Subclasses might also want to pre-warm, but let them call that themselves in case
+  // they want to e.g. do some allocations first.
+}
 void nam::DSP::SetLoudness(const double loudness)
 {
   mLoudness = loudness;
   mHasLoudness = true;
 }
-
-void nam::DSP::finalize_(const int num_frames) {}
 
 // Buffer =====================================================================
 
@@ -128,9 +145,8 @@ void nam::Buffer::_reset_input_buffer()
   this->_input_buffer_offset = this->_receptive_field;
 }
 
-void nam::Buffer::finalize_(const int num_frames)
+void nam::Buffer::_advance_input_buffer_(const int num_frames)
 {
-  this->nam::DSP::finalize_(num_frames);
   this->_input_buffer_offset += num_frames;
 }
 
@@ -157,12 +173,15 @@ void nam::Linear::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_f
   this->nam::Buffer::_update_buffers_(input, num_frames);
 
   // Main computation!
-  for (size_t i = 0; i < num_frames; i++)
+  for (int i = 0; i < num_frames; i++)
   {
-    const size_t offset = this->_input_buffer_offset - this->_weight.size() + i + 1;
+    const long offset = this->_input_buffer_offset - this->_weight.size() + i + 1;
     auto input = Eigen::Map<const Eigen::VectorXf>(&this->_input_buffer[offset], this->_receptive_field);
     output[i] = this->_bias + this->_weight.dot(input);
   }
+
+  // Prepare for next call:
+  nam::Buffer::_advance_input_buffer_(num_frames);
 }
 
 // NN modules =================================================================

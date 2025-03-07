@@ -49,7 +49,6 @@ void NeuralAmpModeler::processBlock(juce::AudioBuffer<float>& buffer)
         buffer.applyGain(dB_to_linear(params[Parameters::kInputLevel]->load()));
 
         mModel->process(*inputPointer, *outputPointer, buffer.getNumSamples());
-        mModel->finalize_(buffer.getNumSamples());
 
         // Normalize loudness
         if (this->outputNormalized)

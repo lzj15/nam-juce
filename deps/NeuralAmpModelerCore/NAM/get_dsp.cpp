@@ -66,7 +66,7 @@ void verify_config_version(const std::string versionStr)
   }
 }
 
-std::vector<float> GetWeights(nlohmann::json const& j, const std::filesystem::path config_path)
+std::vector<float> GetWeights(nlohmann::json const& j)
 {
   auto it = j.find("weights");
   if (it != j.end())
@@ -86,7 +86,7 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename)
 std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspData& returnedConfig)
 {
   if (!std::filesystem::exists(config_filename))
-    throw std::runtime_error("Config JSON doesn't exist!\n");
+    throw std::runtime_error("Config file doesn't exist!\n");
   std::ifstream i(config_filename);
   nlohmann::json j;
   i >> j;
@@ -94,7 +94,7 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspDat
 
   auto architecture = j["architecture"];
   nlohmann::json config = j["config"];
-  std::vector<float> weights = GetWeights(j, config_filename);
+  std::vector<float> weights = GetWeights(j);
 
   // Assign values to returnedConfig
   returnedConfig.version = j["version"];
@@ -119,6 +119,12 @@ std::unique_ptr<DSP> get_dsp(const std::filesystem::path config_filename, dspDat
   return get_dsp(conf);
 }
 
+struct OptionalValue
+{
+  bool have = false;
+  double value = 0.0;
+};
+
 std::unique_ptr<DSP> get_dsp(dspData& conf)
 {
   verify_config_version(conf.version);
@@ -126,16 +132,24 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
   auto& architecture = conf.architecture;
   nlohmann::json& config = conf.config;
   std::vector<float>& weights = conf.weights;
-  bool haveLoudness = false;
-  double loudness = 0.0;
+  OptionalValue loudness, inputLevel, outputLevel;
+
+  auto AssignOptional = [&conf](const std::string key, OptionalValue& v) {
+    if (conf.metadata.find(key) != conf.metadata.end())
+    {
+      if (!conf.metadata[key].is_null())
+      {
+        v.value = conf.metadata[key];
+        v.have = true;
+      }
+    }
+  };
 
   if (!conf.metadata.is_null())
   {
-    if (conf.metadata.find("loudness") != conf.metadata.end())
-    {
-      loudness = conf.metadata["loudness"];
-      haveLoudness = true;
-    }
+    AssignOptional("loudness", loudness);
+    AssignOptional("input_level_dbu", inputLevel);
+    AssignOptional("output_level_dbu", outputLevel);
   }
   const double expectedSampleRate = conf.expected_sample_rate;
 
@@ -172,7 +186,7 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
                                   layer_config["channels"], layer_config["kernel_size"], layer_config["dilations"],
                                   layer_config["activation"], layer_config["gated"], layer_config["head_bias"]));
     }
-    const bool with_head = config["head"] == NULL;
+    const bool with_head = !config["head"].is_null();
     const float head_scale = config["head_scale"];
     out = std::make_unique<wavenet::WaveNet>(layer_array_params, head_scale, with_head, weights, expectedSampleRate);
   }
@@ -180,12 +194,21 @@ std::unique_ptr<DSP> get_dsp(dspData& conf)
   {
     throw std::runtime_error("Unrecognized architecture");
   }
-  if (haveLoudness)
+  if (loudness.have)
   {
-    out->SetLoudness(loudness);
+    out->SetLoudness(loudness.value);
+  }
+  if (inputLevel.have)
+  {
+    out->SetInputLevel(inputLevel.value);
+  }
+  if (outputLevel.have)
+  {
+    out->SetOutputLevel(outputLevel.value);
   }
 
   // "pre-warm" the model to settle initial conditions
+  // Can this be removed now that it's part of Reset()?
   out->prewarm();
 
   return out;

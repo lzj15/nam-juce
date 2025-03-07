@@ -44,6 +44,9 @@ public:
   virtual ~DSP() = default;
   // prewarm() does any required intial work required to "settle" model initial conditions
   // it can be somewhat expensive, so should not be called during realtime audio processing
+  // Important: don't expect the model to be outputting zeroes after this. Neural networks
+  // Don't know that there's anything special about "zero", and forcing this gets rid of
+  // some possibilities that I dont' want to rule out (e.g. models that "are noisy").
   virtual void prewarm();
   // process() does all of the processing requried to take `input` array and
   // fill in the required values on `output`.
@@ -52,22 +55,48 @@ public:
   //    overridden in subclasses).
   // 2. The output level is applied and the result stored to `output`.
   virtual void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames);
-  // Anything to take care of before next buffer comes in.
-  // For example:
-  // * Move the buffer index forward
-  virtual void finalize_(const int num_frames);
   // Expected sample rate, in Hz.
   // TODO throw if it doesn't know.
   double GetExpectedSampleRate() const { return mExpectedSampleRate; };
+  // Input Level, in dBu, corresponding to 0 dBFS for a sine wave
+  // You should call HasInputLevel() first to be safe.
+  double GetInputLevel() { return mInputLevel.level; };
   // Get how loud this model is, in dB.
   // Throws a std::runtime_error if the model doesn't know how loud it is.
   double GetLoudness() const;
+  // Output Level, in dBu, corresponding to 0 dBFS for a sine wave
+  // You should call HasOutputLevel() first to be safe.
+  double GetOutputLevel() { return mOutputLevel.level; };
+  // Does this model know its output level?
+  bool HasInputLevel() { return mInputLevel.haveLevel; };
   // Get whether the model knows how loud it is.
   bool HasLoudness() const { return mHasLoudness; };
+  // Does this model know its output level?
+  bool HasOutputLevel() { return mOutputLevel.haveLevel; };
+  // General function for resetting the DSP unit.
+  // This doesn't call prewarm(). If you want to do that, then you might want to use ResetAndPrewarm().
+  // See https://github.com/sdatkinson/NeuralAmpModelerCore/issues/96 for the reasoning.
+  virtual void Reset(const double sampleRate, const int maxBufferSize);
+  // Reset(), then prewarm()
+  void ResetAndPrewarm(const double sampleRate, const int maxBufferSize)
+  {
+    Reset(sampleRate, maxBufferSize);
+    prewarm();
+  }
+  void SetInputLevel(const double inputLevel)
+  {
+    mInputLevel.haveLevel = true;
+    mInputLevel.level = inputLevel;
+  };
   // Set the loudness, in dB.
   // This is usually defined to be the loudness to a standardized input. The trainer has its own, but you can always
   // use this to define it a different way if you like yours better.
   void SetLoudness(const double loudness);
+  void SetOutputLevel(const double outputLevel)
+  {
+    mOutputLevel.haveLevel = true;
+    mOutputLevel.level = outputLevel;
+  };
 
 protected:
   bool mHasLoudness = false;
@@ -75,8 +104,23 @@ protected:
   double mLoudness = 0.0;
   // What sample rate does the model expect?
   double mExpectedSampleRate;
-  // How many samples should be processed during "pre-warming"
-  int _prewarm_samples = 0;
+  // Have we been told what the external sample rate is? If so, what is it?
+  bool mHaveExternalSampleRate = false;
+  double mExternalSampleRate = -1.0;
+  // The largest buffer I expect to be told to process:
+  int mMaxBufferSize = 512;
+
+  // How many samples should be processed for me to be considered "warmed up"?
+  virtual int PrewarmSamples() { return 0; };
+
+private:
+  struct Level
+  {
+    bool haveLevel = false;
+    float level = 0.0;
+  };
+  Level mInputLevel;
+  Level mOutputLevel;
 };
 
 // Class where an input buffer is kept so that long-time effects can be
@@ -86,7 +130,6 @@ class Buffer : public DSP
 {
 public:
   Buffer(const int receptive_field, const double expected_sample_rate = -1.0);
-  void finalize_(const int num_frames);
 
 protected:
   // Input buffer
@@ -97,6 +140,7 @@ protected:
   std::vector<float> _input_buffer;
   std::vector<float> _output_buffer;
 
+  void _advance_input_buffer_(const int num_frames);
   void _set_receptive_field(const int new_receptive_field, const int input_buffer_size);
   void _set_receptive_field(const int new_receptive_field);
   void _reset_input_buffer();
@@ -120,6 +164,7 @@ protected:
 
 // NN modules =================================================================
 
+// TODO conv could take care of its own ring buffer.
 class Conv1D
 {
 public:

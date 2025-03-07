@@ -44,7 +44,6 @@ public:
         auto ProcessBlockFunc = [&](NAM_SAMPLE** input, NAM_SAMPLE** output, int numFrames)
         {
             mEncapsulated->process(input[0], output[0], numFrames);
-            mEncapsulated->finalize_(numFrames);
         };
         mBlockProcessFunc = ProcessBlockFunc;
 
@@ -68,8 +67,7 @@ public:
 
     void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames) override
     {
-        if (!mFinalized)
-            throw std::runtime_error("Processing was called before the last block was finalized!");
+
         if (num_frames > mMaxExternalBlockSize)
             // We can afford to be careful
             throw std::runtime_error("More frames were provided than the max expected!");
@@ -77,7 +75,6 @@ public:
         if (!NeedToResample())
         {
             mEncapsulated->process(input, output, num_frames);
-            mEncapsulated->finalize_(num_frames);
         }
         else
         {
@@ -86,23 +83,9 @@ public:
 
         // Prepare for external call to .finalize_()
         lastNumExternalFramesProcessed = num_frames;
-        mFinalized = false;
     };
 
-    void finalize_(const int num_frames) override
-    {
-        if (mFinalized)
-            throw std::runtime_error("Call to ResamplingNAM.finalize_() when the object is already in a finalized state!");
-        if (num_frames != lastNumExternalFramesProcessed)
-            throw std::runtime_error(
-                "finalize_() called on ResamplingNAM with a different number of frames from what was just processed. Something "
-                "is probably going wrong.");
 
-        // We don't actually do anything--it was taken care of during BlockProcessFunc()!
-
-        // prepare for next call to `.process()`
-        mFinalized = true;
-    };
 
     int GetLatency() const { return NeedToResample() ? mResampler.GetLatency() : 0; };
 
@@ -121,9 +104,7 @@ public:
             input.push_back((NAM_SAMPLE)0.0);
         output.resize(maxEncapsulatedBlockSize); // Doesn't matter what's in here
         mEncapsulated->process(input.data(), output.data(), maxEncapsulatedBlockSize);
-        mEncapsulated->finalize_(maxEncapsulatedBlockSize);
 
-        mFinalized = true; // prepare for `.process()`
     };
 
     // So that we can let the world know if we're resampling (useful for debugging)
@@ -137,7 +118,6 @@ private:
     // This flag makes sure that the NAM sees alternating instances of .process() and .finalize_()
     // A value of `true` means that we expect the ResamplingNAM object to see .process() next;
     // `false` means we expect .finalize_() next.
-    bool mFinalized = true;
 
     // The resampling wrapper
     dsp::ResamplingContainer<NAM_SAMPLE, 1, 12> mResampler;

@@ -29,7 +29,7 @@ public:
   , _input_mixin(condition_size, gated ? 2 * channels : channels, false)
   , _1x1(channels, channels, true)
   , _activation(activations::Activation::get_activation(activation))
-  , _gated(gated){};
+  , _gated(gated) {};
   void set_weights_(std::vector<float>::iterator& weights);
   // :param `input`: from previous layer
   // :param `output`: to next layer
@@ -170,9 +170,17 @@ public:
   WaveNet(const std::vector<LayerArrayParams>& layer_array_params, const float head_scale, const bool with_head,
           std::vector<float> weights, const double expected_sample_rate = -1.0);
   ~WaveNet() = default;
-
-  void finalize_(const int num_frames) override;
+  void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames) override;
   void set_weights_(std::vector<float>& weights);
+
+protected:
+  // Element-wise arrays:
+  Eigen::MatrixXf _condition;
+  // Fill in the "condition" array that's fed into the various parts of the net.
+  virtual void _set_condition_array(NAM_SAMPLE* input, const int num_frames);
+  // How many conditioning inputs are there.
+  // Just one--the audio.
+  virtual int _get_condition_dim() const { return 1; };
 
 private:
   long _num_frames;
@@ -181,8 +189,6 @@ private:
   std::vector<Eigen::MatrixXf> _layer_array_outputs;
   // Head _head;
 
-  // Element-wise arrays:
-  Eigen::MatrixXf _condition;
   // One more than total layer arrays
   std::vector<Eigen::MatrixXf> _head_arrays;
   float _head_scale;
@@ -190,13 +196,13 @@ private:
 
   void _advance_buffers_(const int num_frames);
   void _prepare_for_frames_(const long num_frames);
-  void process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames) override;
 
-  virtual int _get_condition_dim() const { return 1; };
-  // Fill in the "condition" array that's fed into the various parts of the net.
-  virtual void _set_condition_array(NAM_SAMPLE* input, const int num_frames);
+  
   // Ensure that all buffer arrays are the right size for this num_frames
   void _set_num_frames_(const long num_frames);
+
+  int mPrewarmSamples = 0; // Pre-compute during initialization
+  int PrewarmSamples() override { return mPrewarmSamples; };
 };
 }; // namespace wavenet
 }; // namespace nam

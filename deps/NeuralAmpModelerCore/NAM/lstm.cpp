@@ -80,8 +80,16 @@ nam::lstm::LSTM::LSTM(const int num_layers, const int input_size, const int hidd
 
 void nam::lstm::LSTM::process(NAM_SAMPLE* input, NAM_SAMPLE* output, const int num_frames)
 {
-  for (size_t i = 0; i < num_frames; i++)
+  for (int i = 0; i < num_frames; i++)
     output[i] = this->_process_sample(input[i]);
+}
+
+int nam::lstm::LSTM::PrewarmSamples()
+{
+  int result = (int)(0.5 * mExpectedSampleRate);
+  // If the expected sample rate wasn't provided, it'll be -1.
+  // Make sure something still happens.
+  return result <= 0 ? 1 : result;
 }
 
 float nam::lstm::LSTM::_process_sample(const float x)
