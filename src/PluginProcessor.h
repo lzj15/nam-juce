@@ -78,19 +78,11 @@ public:
 
     PresetManager& getPresetManager() { return presetManager; };
 
-    bool eqModuleVisible{false};
-
     void loadFromPreset (juce::String modelPath, juce::String irPath);
 
 
 private:
     //==============================================================================
-
-    enum OutputFilters
-    {
-        LowCutF = 0,
-        HighCutF
-    };
 
     NeuralAmpModeler myNAM;
 

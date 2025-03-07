@@ -21,13 +21,9 @@ NamJUCEAudioProcessor::NamJUCEAudioProcessor()
     #endif
                          ),
       apvts(*this, nullptr, "Params", createParameters()),
-      lowCut(juce::dsp::IIR::Coefficients<float>::makeHighPass(44100, 20.0f, 1.0f)),
-      highCut(juce::dsp::IIR::Coefficients<float>::makeLowPass(44100, 20000.0f, 1.0f)),
       presetManager(apvts)
 #endif
 {
-    filterCuttofs[OutputFilters::LowCutF] = apvts.getRawParameterValue("LOWCUT_ID");
-    filterCuttofs[OutputFilters::HighCutF] = apvts.getRawParameterValue("HIGHCUT_ID");
 }
 
 NamJUCEAudioProcessor::~NamJUCEAudioProcessor() {}
@@ -104,13 +100,6 @@ void NamJUCEAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock
 
     cab.reset();
     cab.prepare(spec);
-
-
-
-    lowCut.reset();
-    lowCut.prepare(spec);
-    highCut.reset();
-    highCut.prepare(spec);
 
     meterInSource.resize(getTotalNumOutputChannels(), sampleRate * 0.1 / samplesPerBlock);
     meterOutSource.resize(getTotalNumOutputChannels(), sampleRate * 0.1 / samplesPerBlock);

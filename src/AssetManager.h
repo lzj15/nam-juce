@@ -9,10 +9,6 @@ class AssetManager
 public:
     AssetManager()
     {
-        toggleButtonAssets[Buttons::EQ_BUTTON][ToggleButtonStates::OFF] =
-            juce::ImageFileFormat::loadFrom(BinaryData::eqoff_png, BinaryData::eqoff_pngSize);
-        toggleButtonAssets[Buttons::EQ_BUTTON][ToggleButtonStates::ON] =
-            juce::ImageFileFormat::loadFrom(BinaryData::eqon_png, BinaryData::eqon_pngSize);
         toggleButtonAssets[Buttons::NORMALIZE_BUTTON][ToggleButtonStates::OFF] =
             juce::ImageFileFormat::loadFrom(BinaryData::normalizeoff_png, BinaryData::normalizeoff_pngSize);
         toggleButtonAssets[Buttons::NORMALIZE_BUTTON][ToggleButtonStates::ON] =
@@ -70,7 +66,6 @@ public:
         IR_BUTTON = 0,
         NORMALIZE_BUTTON,
         TONESTACK_BUTTON,
-        EQ_BUTTON
     };
 
 private:

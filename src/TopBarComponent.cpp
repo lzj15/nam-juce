@@ -62,10 +62,7 @@ void TopBarComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
 
         switch (selection)
         {
-            case DropdownOptions::AudioSettings:
-                if (JUCEApplication::isStandaloneApp())
-                    juce::StandalonePluginHolder::getInstance()->showAudioSettingsDialog();
-                break;
+            case DropdownOptions::AudioSettings: break;
             case DropdownOptions::GetModels: modelsURL.launchInDefaultBrowser(); break;
             case DropdownOptions::Info:
                 openInfoWindow("NEURAL AMP MODELER\n\nVersion " + juce::String(PLUG_VERSION)
