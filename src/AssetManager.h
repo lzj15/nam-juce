@@ -1,6 +1,5 @@
 #pragma once
 #include <JuceHeader.h>
-#include "BinaryData.h"
 #include "LedButtonComponent.h"
 
 // This will need refactoring...
@@ -25,7 +24,7 @@ public:
 
     ~AssetManager() {}
 
-    juce::Image getBackground() { return background; }
+    // juce::Image getBackground() { return background; }
 
     juce::Image getScreens() { return screens; }
 
@@ -69,7 +68,7 @@ public:
     };
 
 private:
-    juce::Image background = juce::ImageFileFormat::loadFrom(BinaryData::background_png, BinaryData::background_pngSize);
+    // juce::Image background = juce::ImageFileFormat::loadFrom(BinaryData::background_png, BinaryData::background_pngSize);
     juce::Image screens = juce::ImageFileFormat::loadFrom(BinaryData::screens_png, BinaryData::screens_pngSize);
 
     // Load IR Button Assets

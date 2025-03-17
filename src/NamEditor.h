@@ -6,7 +6,7 @@
 #include "TopBarComponent.h"
 #include "LedButtonComponent.h"
 
-#define NUM_SLIDERS 9
+#define NUM_SLIDERS 6
 
 class NamEditor : public juce::AudioProcessorEditor, public juce::Timer, public juce::Slider::Listener
 {
@@ -17,8 +17,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized () override;
 
-    void timerCallback ();
-    void sliderValueChanged (juce::Slider* slider);
+    void timerCallback () override;
+    void sliderValueChanged (juce::Slider* slider) override;
 
     void setToneStackEnabled (bool toneStackEnabled);
 

@@ -192,7 +192,7 @@ void NamEditor::paint(juce::Graphics& g)
     g.setColour(juce::Colours::white);
     g.setFont(15.0f);
 
-    g.drawImageAt(assetManager->getBackground(), 0, 0);
+    // g.drawImageAt(assetManager->getBackground(), 0, 0);
     g.drawImageAt(assetManager->getScreens(), 0, 0);
 
     //// TODO: Move this into a dedicated component with its own timer

@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(NAMLoaderPlugin VERSION 0.0.1)
+project(neural-amp-modeler VERSION 0.0.1)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)

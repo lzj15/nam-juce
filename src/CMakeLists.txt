@@ -7,6 +7,6 @@ PRIVATE
     PluginEditor.cpp
     PluginProcessor.cpp
     TopBarComponent.cpp
-    PresetManager/PresetManager.cpp
-    PresetManager/PresetManagerComponent.cpp
+    PresetManager.cpp
+    PresetManagerComponent.cpp
 )
