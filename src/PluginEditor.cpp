@@ -2,27 +2,21 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-NamJUCEAudioProcessorEditor::NamJUCEAudioProcessorEditor(NamJUCEAudioProcessor& p) : AudioProcessorEditor(&p), audioProcessor(p), namEditor(p)
+NAMAudioProcessorEditor::NAMAudioProcessorEditor(NAMAudioProcessor& p)
+    : AudioProcessorEditor(&p), processorRef(p)
 {
-
     setSize(950, 650);
-
-    // Main NAM Editor
-    addAndMakeVisible(&namEditor);
-    namEditor.setBounds(getLocalBounds());
-
 }
 
-NamJUCEAudioProcessorEditor::~NamJUCEAudioProcessorEditor()
+NAMAudioProcessorEditor::~NAMAudioProcessorEditor()
 {
 }
 
 //==============================================================================
-void NamJUCEAudioProcessorEditor::paint(juce::Graphics& g) {}
+void NAMAudioProcessorEditor::paint(juce::Graphics& g)
+{
+}
 
-void NamJUCEAudioProcessorEditor::resized() {}
-
-
-void NamJUCEAudioProcessorEditor::sliderValueChanged(juce::Slider* slider) {}
-
-void NamJUCEAudioProcessorEditor::timerCallback() {}
+void NAMAudioProcessorEditor::resized()
+{
+}

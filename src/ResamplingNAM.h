@@ -8,17 +8,9 @@ namespace iplug
 static const double PI = 3.1415926535897931;
 };
 
-#include <algorithm> // std::clamp, std::min
 #include <cmath> // pow
-#include <filesystem>
-#include <iostream>
-#include <utility>
-#include "../deps/NeuralAmpModelerCore/NAM/dsp.h"
-#include "../deps/AudioDSPTools/dsp/NoiseGate.h"
-#include "../deps/AudioDSPTools/dsp/dsp.h"
-#include "../deps/AudioDSPTools/dsp/ResamplingContainer/ResamplingContainer.h"
-#include "../deps/AudioDSPTools/dsp/ImpulseResponse.h"
-#include "../deps/AudioDSPTools/dsp/wav.h"
+#include <dsp.h>
+#include <ResamplingContainer.h>
 
 // Get the sample rate of a NAM model.
 // Sometimes, the model doesn't know its own sample rate; this wrapper guesses 48k based on the way that most
@@ -89,7 +81,7 @@ public:
 
     int GetLatency() const { return NeedToResample() ? mResampler.GetLatency() : 0; };
 
-    void Reset(const double sampleRate, const int maxBlockSize)
+    void Reset(const double sampleRate, const int maxBlockSize) override
     {
         mExpectedSampleRate = sampleRate;
         mMaxExternalBlockSize = maxBlockSize;

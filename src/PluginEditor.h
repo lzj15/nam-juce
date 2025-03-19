@@ -1,28 +1,20 @@
 #pragma once
 
-#include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "NamEditor.h"
 
 //==============================================================================
-/**
- */
-class NamJUCEAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer, public juce::Slider::Listener
+class NAMAudioProcessorEditor final : public juce::AudioProcessorEditor
 {
 public:
-    NamJUCEAudioProcessorEditor(NamJUCEAudioProcessor&);
-    ~NamJUCEAudioProcessorEditor() override;
+    explicit NAMAudioProcessorEditor(NAMAudioProcessor&);
+    ~NAMAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized () override;
-    void timerCallback () override;
-    void sliderValueChanged (juce::Slider* slider) override;
 
 private:
-    NamEditor namEditor;
+    NAMAudioProcessor& processorRef;
 
-    NamJUCEAudioProcessor& audioProcessor;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NamJUCEAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NAMAudioProcessorEditor)
 };
