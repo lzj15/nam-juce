@@ -13,7 +13,7 @@ add_subdirectory(deps/JUCE)
 add_subdirectory(deps/NeuralAmpModelerCore/Dependencies/eigen)
 
 juce_add_plugin(${PROJECT_NAME}
-    PRODUCT_NAME "Neural Amp Modeler"
+    PRODUCT_NAME "NAM"
     VERSION ${PLUGIN_VERSION}
     FORMATS VST3 Standalone
     IS_SYNTH FALSE
@@ -26,19 +26,22 @@ juce_add_plugin(${PROJECT_NAME}
 
 juce_generate_juce_header(${PROJECT_NAME})
 
-add_subdirectory(assets)
-add_subdirectory(src)
-
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         deps/NeuralAmpModelerCore/NAM
         deps/NeuralAmpModelerCore/Dependencies/nlohmann
         deps/AudioDSPTools/dsp
+        deps/AudioDSPTools/dsp/ResamplingContainer
         deps/ff_meters
     )
 
 target_sources(${PROJECT_NAME}
     PRIVATE
+        src/NeuralAmpModeler.cpp
+        src/StatusedTrigger.cpp
+        src/ToneStack.cpp
+        src/PluginEditor.cpp
+        src/PluginProcessor.cpp
         deps/NeuralAmpModelerCore/NAM/activations.cpp
         deps/NeuralAmpModelerCore/NAM/convnet.cpp
         deps/NeuralAmpModelerCore/NAM/dsp.cpp
@@ -70,5 +73,8 @@ target_link_libraries(${PROJECT_NAME}
         juce::juce_audio_utils
         juce::juce_dsp
         Eigen3::Eigen
-        BinaryData
+    # PUBLIC
+    #     juce::juce_recommended_config_flags
+    #     juce::juce_recommended_lto_flags
+    #     juce::juce_recommended_warning_flags
     )

@@ -2,30 +2,22 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
-#include "NeuralAmpModeler.h"
 #include <ff_meters.h>
-#include "PresetManager.h"
+#include "NeuralAmpModeler.h"
+
 //==============================================================================
-/**
- */
-class NamJUCEAudioProcessor : public juce::AudioProcessor
-#if JucePlugin_Enable_ARA
-    ,
-                              public juce::AudioProcessorARAExtension
-#endif
+class NAMAudioProcessor final : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    NamJUCEAudioProcessor();
-    ~NamJUCEAudioProcessor() override;
+    NAMAudioProcessor();
+    ~NAMAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources () override;
 
-#ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-#endif
 
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
@@ -52,6 +44,7 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    //==============================================================================
     void loadNamModel (juce::File modelToLoad);
     bool getNamModelStatus ();
     void clearNAM ();
@@ -62,37 +55,16 @@ public:
 
     bool getTriggerStatus ();
 
-
-    const std::string getLastModelPath() { return lastModelPath; };
-    const std::string getLastModelName() { return lastModelName; };
-    const std::string getLastIrPath() { return lastIrPath; };
-    const std::string getLastIrName() { return lastIrName; };
-    const std::string getLastModelSearchDirectory() { return lastModelSerachDir; };
-    const std::string getLastIrSearchDirectory() { return lastIrSerachDir; };
-
-    foleys::LevelMeterSource& getMeterInSource() { return meterInSource; }
-    foleys::LevelMeterSource& getMeterOutSource() { return meterOutSource; }
-
     juce::AudioProcessorValueTreeState apvts;
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters ();
 
-    PresetManager& getPresetManager() { return presetManager; };
-
-    void loadFromPreset (juce::String modelPath, juce::String irPath);
-
-
 private:
     //==============================================================================
-
     NeuralAmpModeler myNAM;
 
     juce::dsp::Convolution cab;
     bool irFound{false};
     bool irLoaded{false};
-
-    std::atomic<float>* filterCuttofs[2];
-
-    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> highCut, lowCut;
 
     std::string lastModelPath = "null";
     std::string lastModelName = "null";
@@ -105,12 +77,9 @@ private:
 
     bool namModelLoaded{false};
 
-
-
     foleys::LevelMeterSource meterInSource;
     foleys::LevelMeterSource meterOutSource;
 
-    PresetManager presetManager;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NamJUCEAudioProcessor)
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NAMAudioProcessor)
 };

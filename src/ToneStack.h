@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include "../deps/AudioDSPTools/dsp/dsp.h"
-#include "../deps/AudioDSPTools/dsp/RecursiveLinearFilter.h"
+#include <dsp.h>
+#include <RecursiveLinearFilter.h>
 
 namespace dsp
 {
@@ -40,10 +40,10 @@ public:
     };
     ~BasicNamToneStack() = default;
 
-    DSP_SAMPLE** Process (DSP_SAMPLE** inputs, const int numChannels, const int numFrames);
+    DSP_SAMPLE** Process (DSP_SAMPLE** inputs, const int numChannels, const int numFrames) override;
     virtual void Reset (const double sampleRate, const int maxBlockSize) override;
     // :param val: Assumed to be between 0 and 10, 5 is "noon"
-    void SetParam (const std::string name, const double val);
+    void SetParam (const std::string name, const double val) override;
 
 
 protected:

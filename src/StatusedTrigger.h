@@ -9,8 +9,8 @@
 #include <cmath> // pow
 #include <sstream>
 
-#include "../deps/AudioDSPTools/dsp/dsp.h"
-#include "../deps/AudioDSPTools/dsp/NoiseGate.h"
+#include <dsp.h>
+#include <NoiseGate.h>
 
 extern const double dsp::noise_gate::MINIMUM_LOUDNESS_DB;
 extern const double dsp::noise_gate::MINIMUM_LOUDNESS_POWER;
